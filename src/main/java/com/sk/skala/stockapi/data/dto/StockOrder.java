@@ -14,7 +14,6 @@ public class StockOrder {
     @Min(value = 1, message = "수량은 1개 이상이어야 합니다.")
     private int stockQuantity;
 
-    // --- 여기서부터 수동으로 추가 (롬복 에러 해결용) ---
     public String getPlayerId() { return playerId; }
     public void setPlayerId(String playerId) { this.playerId = playerId; }
 

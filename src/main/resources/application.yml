@@ -19,9 +19,8 @@ spring:
     resources:
       add-mappings: false
 
-  # [수정된 부분] H2 DB 데이터를 파일로 저장하는 설정
   datasource:
-    # ~/skala-stock 경로에 파일로 저장합니다. (서버 재기동 시 데이터 유지)
+    # ~/skala-stock 경로에 파일로 저장 (서버 재기동 시 데이터 유지)
     url: jdbc:h2:file:~/skala-stock-api;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
@@ -37,7 +36,7 @@ spring:
 
   jpa:
     hibernate:
-      # update로 설정해야 기존 테이블과 데이터를 삭제하지 않고 유지합니다.
+      # update로 설정해야 기존 테이블과 데이터를 삭제하지 않고 유지
       ddl-auto: update
     show-sql: true
     properties:
