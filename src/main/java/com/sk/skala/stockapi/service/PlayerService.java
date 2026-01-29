@@ -1,75 +1,46 @@
 package com.sk.skala.stockapi.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.sk.skala.stockapi.data.common.PagedList;
 import com.sk.skala.stockapi.data.common.Response;
-import com.sk.skala.stockapi.data.dto.PlayerStockDto;
-import com.sk.skala.stockapi.data.dto.PlayerStockListDto;
 import com.sk.skala.stockapi.data.table.Player;
 import com.sk.skala.stockapi.repository.PlayerRepository;
-import com.sk.skala.stockapi.repository.PlayerStockRepository;
-import com.sk.skala.stockapi.repository.StockRepository;
+import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @Service
-@Transactional
+@RequiredArgsConstructor // Repository 주입을 위한 생성자 자동 생성
 public class PlayerService {
 
-    private final StockRepository stockRepository;
     private final PlayerRepository playerRepository;
-    private final PlayerStockRepository playerStockRepository;
 
-    // 직접 생성자 작성 (롬복 없이 초기화 에러 해결)
-    public PlayerService(StockRepository stockRepository, 
-                         PlayerRepository playerRepository, 
-                         PlayerStockRepository playerStockRepository) {
-        this.stockRepository = stockRepository;
-        this.playerRepository = playerRepository;
-        this.playerStockRepository = playerStockRepository;
+    // 플레이어 생성 및 구매/판매 데이터 저장
+    public Response createPlayer(Player player) {
+        playerRepository.save(player);
+        Response response = new Response();
+        response.setResult(0);
+        response.setMessage("성공");
+        return response;
     }
 
-    @Transactional(readOnly = true)
+    // [중요] 플레이어 삭제 메서드 추가: 이 메서드가 없어서 에러가 났던 것입니다.
+    public Response deletePlayer(Player player) {
+        if (player.getPlayerId() != null) {
+            // ID를 기준으로 실제 데이터를 삭제합니다.
+            playerRepository.deleteById(player.getPlayerId());
+        }
+        
+        Response response = new Response();
+        response.setResult(0);
+        response.setMessage("정상적으로 삭제되었습니다.");
+        return response;
+    }
+
+    // 전체 목록 조회
     public Response getAllPlayers(int offset, int count) {
-        Pageable pageable = PageRequest.of(offset, count);
-        Page<Player> page = playerRepository.findAll(pageable);
-
-        PagedList pagedList = new PagedList();
-        pagedList.setTotal(page.getTotalElements());
-        pagedList.setCount((long) page.getSize());
-        pagedList.setOffset((long) page.getNumber());
-        pagedList.setList(page.getContent());
-
-        return Response.ok(pagedList);
-    }
-
-    @Transactional(readOnly = true)
-    public Response getPlayerById(String playerId) {
-        Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new RuntimeException("Player not found"));
-
-        List<PlayerStockDto> stockDtos = playerStockRepository.findByPlayer_PlayerId(playerId)
-                .stream()
-                .map(ps -> {
-                    PlayerStockDto dto = new PlayerStockDto();
-                    dto.setStockId(ps.getStock().getId());
-                    dto.setStockName(ps.getStock().getStockName());
-                    dto.setStockPrice(ps.getStock().getStockPrice());
-                    dto.setQuantity(ps.getQuantity());
-                    return dto;
-                })
-                .collect(Collectors.toList());
-
-        PlayerStockListDto responseDto = new PlayerStockListDto();
-        responseDto.setPlayerId(player.getPlayerId());
-        responseDto.setPlayerMoney(player.getPlayerMoney());
-        responseDto.setStocks(stockDtos);
-
-        return Response.ok(responseDto);
+        List<Player> players = playerRepository.findAll();
+        Response response = new Response();
+        response.setResult(0);
+        response.setBody(players);
+        return response;
     }
 }
