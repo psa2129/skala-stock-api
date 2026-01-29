@@ -1,0 +1,52 @@
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    root: INFO
+    '[com.sk.skala]': DEBUG
+    
+spring:
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+  # [수정된 부분] H2 DB 데이터를 파일로 저장하는 설정
+  datasource:
+    # ~/skala-stock 경로에 파일로 저장합니다. (서버 재기동 시 데이터 유지)
+    url: jdbc:h2:file:~/skala-stock-api;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        trace: false
+        web-allow-others: false
+
+  jpa:
+    hibernate:
+      # update로 설정해야 기존 테이블과 데이터를 삭제하지 않고 유지합니다.
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+    
+application:
+  name: "SKALA-STOCK-API"
+  health:
+    url: http://localhost:8080/actuator/health
+    timeout: 5000
